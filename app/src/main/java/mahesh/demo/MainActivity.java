@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -94,6 +96,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_share:
+
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+
+                intent.putExtra(Intent.EXTRA_TEXT, "Task");
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(Intent.createChooser(intent,"Share using"));
+                } else {
+                    startActivity(intent);
+                }
+                return true;
+            case R.id.action_delete:
+                Toast.makeText(this, "Task Deleted", Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     private void setUpListViewListener() {
 
         final Intent intent = new Intent(this, AddTodo.class);
@@ -133,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
             map.put("Priority", tasks.get(i).priority);
             map.put("Status", tasks.get(i).status);
             map.put("TaskId", ""+tasks.get(i).taskId);
+            map.put("DueDate", tasks.get(i).taskDueDate.toString());
             list.add(map);
         }
         return list;
@@ -144,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
         map.put("Priority", task.priority);
         map.put("Status", task.status);
         map.put("TaskId", ""+task.taskId);
+        map.put("DueDate", task.taskDueDate.toString());
         items.add(map);
     }
 
@@ -153,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
         map.put("Priority", task.priority);
         map.put("Status", task.status);
         map.put("TaskId", ""+task.taskId);
+        map.put("DueDate", task.taskDueDate.toString());
         items.set(index, map);
     }
 

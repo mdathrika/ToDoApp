@@ -24,6 +24,7 @@ public class MultiColumnAdapter extends BaseAdapter {
 
     TextView taskName;
     TextView priority;
+    TextView dueDate;
     ImageView status;
 
     public MultiColumnAdapter(Activity activity, List<Map<String, String>> list){
@@ -59,7 +60,7 @@ public class MultiColumnAdapter extends BaseAdapter {
             taskName=(TextView) convertView.findViewById(R.id.taskName);
             priority=(TextView) convertView.findViewById(R.id.priority);
             status=(ImageView) convertView.findViewById(R.id.status);
-
+            dueDate = (TextView) convertView.findViewById(R.id.taskDueDate);
         }
 
         Map<String, String> map=list.get(position);
@@ -73,6 +74,8 @@ public class MultiColumnAdapter extends BaseAdapter {
             status.setImageResource(R.drawable.check);
         else
             status.setImageResource(R.drawable.dots_horizontal);
+
+        dueDate.setText(map.get("DueDate"));
 
         return convertView;
 
