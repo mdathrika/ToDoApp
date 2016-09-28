@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">To Do</string>
+    <string name="save">Save</string>
+    <string name="share">Share</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="title_activity_add_task">AddTask</string>
+    <string name="entertask">Enter Task Name</string>
+    <string name="enterdesc">Enter Task Description</string>
+    <string name="enterdate">Select Date</string>
+    <string name="entertime">Select Time</string>
+
+    <string-array name="priority_array">
+        <item>HIGH</item>
+        <item>MEDIUM</item>
+        <item>LOW</item>
+    </string-array>
+
+    <string-array name="status_array">
+        <item>TO-DO</item>
+        <item>DONE</item>
+    </string-array>
+</resources>
