@@ -25,9 +25,7 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import mahesh.demo.db.ToDo;
 
@@ -37,7 +35,7 @@ public class AddTodo extends AppCompatActivity implements   TimePickerDialog.OnT
 
     String index = "";
 
-    String taskId = "";
+    int taskId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,15 +51,6 @@ public class AddTodo extends AppCompatActivity implements   TimePickerDialog.OnT
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
-        // Creating adapter for spinner
-//        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, priority);
-//
-//        // Drop down layout style - list view with radio button
-//        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//
-//        // attaching data adapter to spinner
-//        spinner.setAdapter(dataAdapter);
-
         ////Status Spinner
 
         Spinner statusSpinner = (Spinner) findViewById(R.id.spinStatus);
@@ -69,30 +58,16 @@ public class AddTodo extends AppCompatActivity implements   TimePickerDialog.OnT
         // Spinner click listener
         statusSpinner.setOnItemSelectedListener(this);
 
-        // Spinner Drop down elements
-//        List<String> status = new ArrayList<String>();
-//        status.add("TO-DO");
-//        status.add("DONE");
-
-        // Creating adapter for spinner
-       // ArrayAdapter<String> statusAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, status);
 
         ArrayAdapter statusAdapter = ArrayAdapter.createFromResource(this, R.array.status_array, R.layout.spinner_layout);
         statusAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         statusSpinner.setAdapter(statusAdapter);
 
 
-        // Drop down layout style - list view with radio button
-        //statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        // attaching data adapter to spinner
-        //statusSpinner.setAdapter(statusAdapter);
         Intent intent = getIntent();
-        taskId = intent.getStringExtra("taskToEdit");
+        taskId = intent.getIntExtra("taskToEdit", -1);
         index = intent.getStringExtra("index");
-        ToDo taskToLoad = null;
-        if(taskId != null && taskId.length() > 0)
-            taskToLoad = loadTask(Integer.parseInt(taskId));
+        ToDo taskToLoad = loadTask(taskId);
 
         System.out.println("TaskId & Index:: " + taskId+" " +index);
         if(taskToLoad != null) {
@@ -115,16 +90,21 @@ public class AddTodo extends AppCompatActivity implements   TimePickerDialog.OnT
         switch (item.getItemId()) {
             case R.id.action_save:
                 Serializable obj = null;
-                if(taskId == null) {
+                int resultCode = -1;
+                if(taskId == -1) {
                     obj = saveData();
+                    resultCode = 20;
                 } else {
                     obj = updateTask(taskId);
+                    resultCode = 21;
                 }
 
                 Intent data = new Intent();
                 data.putExtra("SavedTask", obj);
                 data.putExtra("index", index);
                 setResult(RESULT_OK, data); // set result code and bundle data for response
+
+
                 finish(); // closes the activity, pass data to parent
                 System.out.println("**** SAVING COMPLETE RETURNING*****");
                 return true;
@@ -222,9 +202,9 @@ public class AddTodo extends AppCompatActivity implements   TimePickerDialog.OnT
         return todo;
     }
 
-    private Serializable updateTask(String taskId) {
+    private Serializable updateTask(int taskId) {
 
-        ToDo todo = loadTask(Integer.parseInt(taskId));
+        ToDo todo = loadTask(taskId);
         todo.taskName = ((EditText)findViewById(R.id.editTastNameText)).getText().toString();
         todo.taskDescription = ((EditText)findViewById(R.id.editDescText)).getText().toString();
 

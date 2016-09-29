@@ -9,32 +9,27 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import mahesh.demo.db.ToDo;
 
 public class MainActivity extends AppCompatActivity {
 
-    //List<String> items;
-    //ArrayAdapter<String> itemsAdapter;
-    List<Map<String, String>> items;
+    List<ToDo> items;
     MultiColumnAdapter multiColumnAdapter;
     ListView lstView;
     private final int NEW_TASK = 20;
     private final int EDIT_TASK = 21;
 
+    private List<ToDo> toDelete = new ArrayList<ToDo>();
+    private List<String> indexes = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
 
         items = readTasks();
         multiColumnAdapter = new MultiColumnAdapter(this, items);
-        //itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1 , items);
         lstView.setAdapter(multiColumnAdapter);
 
         setUpListViewListener();
@@ -53,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClick(View v) {
         Intent intent = new Intent(this, AddTodo.class);
-        //startActivity(intent);
         startActivityForResult(intent, NEW_TASK);
     }
 
@@ -67,16 +60,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        System.out.println("****AFTER SAVING*****"+resultCode);
         if (resultCode == RESULT_OK) {
 
             if(requestCode == NEW_TASK) {
 
                 ToDo task = (ToDo)(data.getExtras().getSerializable("SavedTask"));
-                System.out.println("****IF**AFTER SAVING*****"+task.taskName);
-                //int index = Integer.parseInt(data.getExtras().getString("index"));
                 addToTasks(task);
-                //items.add(task.taskName);
                 multiColumnAdapter.notifyDataSetChanged();
 
                 Toast.makeText(this, "Task Added", Toast.LENGTH_SHORT).show();
@@ -87,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
                 ToDo task = (ToDo)(data.getExtras().getSerializable("SavedTask"));
                 int index = Integer.parseInt(data.getStringExtra("index"));
                 updateTasks(task, index);
-                //items.add(task.taskName);
                 multiColumnAdapter.notifyDataSetChanged();
 
                 Toast.makeText(this, "Task Edited", Toast.LENGTH_SHORT).show();
@@ -113,7 +101,16 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return true;
             case R.id.action_delete:
+                for(int i=0; i< toDelete.size();i++) {
+                    deleteTask(toDelete.get(i).taskId);
+                    items.remove(Integer.parseInt(indexes.get(i)));
+                }
+
+                multiColumnAdapter.notifyDataSetChanged();
                 Toast.makeText(this, "Task Deleted", Toast.LENGTH_SHORT).show();
+
+                toDelete = new ArrayList<ToDo>();
+                indexes = new ArrayList<String>();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -127,8 +124,9 @@ public class MainActivity extends AppCompatActivity {
         lstView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> adapter, View item, int pos, long id) {
-                intent.putExtra("taskToEdit", items.get(pos).get("TaskId"));
+                intent.putExtra("taskToEdit", items.get(pos).taskId);
                 intent.putExtra("index", ""+pos);
+                System.out.println("*****ITEM PRESSED*****"+pos + " : " +id);
                 startActivityForResult(intent, EDIT_TASK);
             }
         });
@@ -137,52 +135,37 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onItemLongClick(AdapterView<?> adapter, View item, int pos, long id) {
-                items.remove(pos);
-                multiColumnAdapter.notifyDataSetChanged();
-                //writeFile();
-                deleteTask(Integer.parseInt(items.get(pos).get("TaskId")));
-                Toast.makeText(ctx, "Task Delete", Toast.LENGTH_SHORT).show();
+
+                //deleteTask(items.get(pos).taskId);
+
+                //items.remove(pos);
+
+                indexes.add(""+pos);
+                toDelete.add(items.get(pos));
+
+                //multiColumnAdapter.notifyDataSetChanged();
+
+                //Toast.makeText(ctx, "Task Delete", Toast.LENGTH_SHORT).show();
+
                 return true;
             }
         });
+
     }
 
 
-    private List<Map<String, String>> readTasks() {
+    private List<ToDo> readTasks() {
         List<ToDo> tasks = new Select()
                 .from(ToDo.class).execute();
-        List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-
-        for(int i=0; i<tasks.size(); i++) {
-            Map<String, String> map = new HashMap<>();
-            map.put("TaskName", tasks.get(i).taskName);
-            map.put("Priority", tasks.get(i).priority);
-            map.put("Status", tasks.get(i).status);
-            map.put("TaskId", ""+tasks.get(i).taskId);
-            map.put("DueDate", tasks.get(i).taskDueDate.toString());
-            list.add(map);
-        }
-        return list;
+        return tasks;
     }
 
     private void addToTasks(ToDo task) {
-        Map<String, String> map = new HashMap<>();
-        map.put("TaskName", task.taskName);
-        map.put("Priority", task.priority);
-        map.put("Status", task.status);
-        map.put("TaskId", ""+task.taskId);
-        map.put("DueDate", task.taskDueDate.toString());
-        items.add(map);
+        items.add(task);
     }
 
     private void updateTasks(ToDo task, int index) {
-        Map<String, String> map = new HashMap<>();
-        map.put("TaskName", task.taskName);
-        map.put("Priority", task.priority);
-        map.put("Status", task.status);
-        map.put("TaskId", ""+task.taskId);
-        map.put("DueDate", task.taskDueDate.toString());
-        items.set(index, map);
+        items.set(index, task);
     }
 
     private void deleteTask(int taskId) {

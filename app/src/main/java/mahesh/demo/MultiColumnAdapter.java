@@ -1,25 +1,25 @@
 package mahesh.demo;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import mahesh.demo.db.ToDo;
 
 /**
  * Created by mdathrika on 9/26/16.
  */
-public class MultiColumnAdapter extends BaseAdapter {
+public class MultiColumnAdapter extends ArrayAdapter<ToDo> {
 
-    public List<Map<String, String>> list;
+    public List<ToDo> list;
     Activity activity;
 
     TextView taskName;
@@ -27,55 +27,38 @@ public class MultiColumnAdapter extends BaseAdapter {
     TextView dueDate;
     ImageView status;
 
-    public MultiColumnAdapter(Activity activity, List<Map<String, String>> list){
-        super();
-        this.activity=activity;
-        this.list=list;
-    }
-
-    @Override
-    public int getCount() {
-        return list.size();
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return list.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return 0;
+    public MultiColumnAdapter(Context context, List<ToDo> list) {
+        super(context, 0, list);
+        this.list = list;
     }
 
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater=activity.getLayoutInflater();
 
         if(convertView == null){
-
-            convertView=inflater.inflate(R.layout.multi_column_list, null);
-
-            taskName=(TextView) convertView.findViewById(R.id.taskName);
-            priority=(TextView) convertView.findViewById(R.id.priority);
-            status=(ImageView) convertView.findViewById(R.id.status);
-            dueDate = (TextView) convertView.findViewById(R.id.taskDueDate);
+            convertView=LayoutInflater.from(getContext()).inflate(R.layout.multi_column_list, parent, false);
         }
 
-        Map<String, String> map=list.get(position);
-        taskName.setText(map.get("TaskName"));
-        priority.setText(map.get("Priority"));
-        int color = map.get("Priority").equalsIgnoreCase("HIGH") ? Color.RED : (map.get("Priority").equalsIgnoreCase("MEDIUM") ? 0xFF4B8FEF  : 0xFFC7720F);
+        taskName=(TextView) convertView.findViewById(R.id.taskName);
+        priority=(TextView) convertView.findViewById(R.id.priority);
+        status=(ImageView) convertView.findViewById(R.id.status);
+        dueDate = (TextView) convertView.findViewById(R.id.taskDueDate);
+
+        ToDo map = getItem(position);
+
+        taskName.setText(map.taskName);
+        priority.setText(map.priority);
+        int color = map.priority.equalsIgnoreCase("HIGH") ? Color.RED : (map.priority.equalsIgnoreCase("MEDIUM") ? 0xFF4B8FEF  : 0xFFC7720F);
         priority.setTextColor(color);
 
 
-        if(map.get("Status").equalsIgnoreCase("DONE"))
+        if(map.status.equalsIgnoreCase("DONE"))
             status.setImageResource(R.drawable.check);
         else
             status.setImageResource(R.drawable.dots_horizontal);
 
-        dueDate.setText(map.get("DueDate"));
+        dueDate.setText(map.taskDueDate.toString());
 
         return convertView;
 
